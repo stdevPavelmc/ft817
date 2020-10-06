@@ -357,6 +357,7 @@ class FT817
 		boolean chkTX();				//
 		byte getDisplaySelection();		// return a number that represents the row (see notes in the header of this file)
 		byte getSMeter();				// as a byte (see notes in the header of this file)
+		bool getNar();					// get the actual narrow status for the current VFO
 		// vars
 		bool eepromValidData = false;	// true of false of the last eeprom read will read 3 times
 										// if two give same values on a row we flag it as valid
@@ -367,19 +368,19 @@ class FT817
 		byte getByte();					// get a single byte and return it
 		void flushRX();					// empty any char in the softserial buffer
 		void flushBuffer();				// zeroing the buffer
-		byte readEEPROM(byte msb, byte lsb);	// read the eeprom, return a byte
-												// if it return the same value two
-												// times in a row we flag the data
-												// as valid via eepromValidData
+		byte readEEPROM();				// read the eeprom, return a byte, MSB & LSB is taken from
+										// the object vars; if it return the same value two time
+										// in a row we flag the data as valid via eepromValidData
 		void sendCmd();					// send the commands in the buffer
 		byte singleCmd(int cmd);		// simplifies small cmds
 		unsigned long from_bcd_be();	// convert the first 4 bytes in buffer to a freq in 10' of hz
 		void to_bcd_be(unsigned long freq);		// get a freq in 10'of hz and place it on the buffer
-
 		// vars
 		unsigned long freq;			// frequency data as a long
 		byte mode;					// last mode read
 		unsigned char buffer[5];	// buffer used to TX and RX data to the radio
+		byte MSB;					// MSB of the eeprom address |
+		byte LSB;					// LSB of the eeprom address | both used to calculate the  
 };
 
 #endif

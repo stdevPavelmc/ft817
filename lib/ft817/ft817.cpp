@@ -126,7 +126,7 @@ void FT817::setFreq(long freq)
 void FT817::setMode(byte mode)
 {
 	// check for valid modes
-	if (mode < 0x05 | mode == 0x06 | mode == 0x08 | mode == 0x0A | mode == 0x0C)
+	if ((mode < 0x05) | (mode == 0x06) | (mode == 0x08) | (mode == 0x0A) | (mode == 0x0C))
 	{
 		flushBuffer();
 		buffer[0] = mode;
@@ -222,7 +222,9 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 // 0 = A / 1 = B
 bool FT817::getVFO()
 {
-	return (bool)(readEEPROM(0x00, 0x55) & 0b00000001);
+	MSB = 0x00;	// set the address to read
+	LSB = 0x55;
+	return (bool)(readEEPROM() & 0b00000001);
 }
 
 // get the mode indirectly
@@ -253,7 +255,9 @@ unsigned long FT817::getFreqMode()
 byte FT817::getBandVFO(bool vfo)
 {
 	// see the band specs in the .h file
-	byte band = readEEPROM(0x00, 0x59);
+	MSB = 0x00;	// set the address to read
+	LSB = 0x59;
+	byte band = readEEPROM();
 	if (vfo)
 	{
 		// B
@@ -291,7 +295,9 @@ boolean FT817::chkTX()
 // values from 0x00 to 0x0B
 byte FT817::getDisplaySelection()
 {
-	return readEEPROM(0x00, 0x76);
+	MSB = 0x00;	// set the address to read
+	LSB = 0x76;
+	return readEEPROM();
 }
 
 // get smeter value
@@ -362,10 +368,10 @@ void FT817::flushBuffer()
 	memset(buffer, 0, 5);
 }
 
-// read a position in the EEPROM and return the byte
-// and set the the variable eepromValidData to true
-// if it return the same value two times in a row
-byte FT817::readEEPROM(byte msb, byte lsb)
+// read a position in the EEPROM MSB & LSB are taken from
+// the object values, we set the the variable eepromValidData
+// to true if it return the same value two times in a row
+byte FT817::readEEPROM()
 {
 	// there is evidence that this fails?
 	byte data = 0;
@@ -373,12 +379,12 @@ byte FT817::readEEPROM(byte msb, byte lsb)
 	for (byte i=0; i<4; i++)
 	{
 		flushBuffer();
-		buffer[0] = msb;  // MSB EEPROM data byte
-		buffer[1] = lsb;  // LSB EEPROM data byte
+		buffer[0] = MSB;  // MSB EEPROM data byte
+		buffer[1] = LSB;  // LSB EEPROM data byte
 		buffer[4] = 0xBB; // BB command byte (read EEPROM data)sendCmd();
 		sendCmd();
 		getBytes(2);
-		if (i > 0 & data == buffer[0])
+		if ((i > 0) & (data == buffer[0]))
 		{
 			eepromValidData = true;
 			break;
