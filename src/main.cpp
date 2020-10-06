@@ -15,6 +15,9 @@
 #include <SoftwareSerial.h>
 #include "ft817.h"
 
+// uncomment this is you want to test the functions that WRITES to the EEPROM 
+#define EEPROM_WRITES
+
 FT817 radio; // define "radio" so that we may pass CAT commands
 
 void setup()
@@ -22,7 +25,7 @@ void setup()
     Serial.begin(9600);
     radio.begin(9600);
 
-    Serial.println("Iniciado...");
+    Serial.println("Starting...");
 }
 
 void loop()
@@ -204,6 +207,25 @@ void loop()
     Serial.print(Nar);
     Serial.println(F(", please check"));
     delay(dly);
+
+#ifdef EEPROM_WRITES
+    Serial.println("Now we will test some of the functions that writes to the EEPROM,");
+    Serial.println("do not interrupt, reset or disconnect any cable from your radio");
+    Serial.println("during this tests");
+    delay(dly);
+
+    // toggle narrow
+    // switch to 20m USB
+    radio.setFreq(1407000);
+    radio.setMode(CAT_MODE_USB);
+    Serial.println("Radio switched to 14.070 Mhz USB, please note the Narrow State");
+    Serial.println("it will change in a few seconds");
+    delay(dly);
+    radio.toggleNar();
+    Serial.println("Radio toggled the narrow status, please check...");
+    delay(dly);
+
+#endif
 
     // end
     Serial.println(F("Radio test end, will restart in 10 seconds..."));
