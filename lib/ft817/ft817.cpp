@@ -108,6 +108,8 @@ void FT817::split(boolean toggle)
 void FT817::toggleVFO()
 {
 	singleCmd(CAT_VFO_AB);
+	// mandatory delay to wait for the radio to apply the changes
+	delay(200);
 }
 
 /****** SET COMMANDS ********/
@@ -216,14 +218,62 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 	getByte();
 }
 
-// Set the narrow value for the actual VFO, with a fast switch of the VFO
-// to apply, this does not check for the actual value, just apply the value
-bool setNar(bool value)
+// Toggle the narrow value for the actual VFO, with a fast switch of the VFO
+// to apply, we check if the state is already as you asked to avoid writing
+// and wearing the EEPROM.
+bool FT817::toggleNar()
 {
 	// Narrow values is the actual VFO base address + 1 byte
-	// then the 4 bit in that bytes
+	// then the 4 bit in that byte
 
+	// try to get the base address to the actual VFO
+	byte count = 3;
+	while (!calcVFOaddr())
+	{
+		count -= 1;
+		if (count == 0) { break; }
+	}
 
+	// success?
+	if (!eepromValidData) { return false; }
+
+	// we have the base for this VFO, add one byte
+	modAddr(0, 1);
+
+	// get the byte with failsafe actions and the nextByte
+	byte actualData = readEEPROM();
+	count = 3;
+	while (!eepromValidData)
+	{
+		count -= 1;
+		actualData = readEEPROM();
+		if (count == 0) { break; }
+	}
+
+	// success?
+	if (!eepromValidData) { return false; }
+
+	// get the nar status
+	bool val = bitRead(actualData, 4);
+	// mod the data with inverted nar value
+	byte newData = bitWrite(actualData, 4, !val);
+
+	// program it back, but first switch the vfo
+	toggleVFO();
+
+	// write it back, with provisions
+	count = 3;
+	while (!writeEEPROM(newData))
+	{
+		count -= 1;
+		if (count == 0) { break; }
+	}
+
+	// switch VFO back to target one no matter if success or not
+	toggleVFO();
+
+	// success?
+	if (eepromValidData) { return true; } else { return false; }
 }
 
 /****** GET COMMANDS ********/
@@ -479,11 +529,11 @@ bool FT817::calcVFOaddr()
 {
 	// get the current vfo
 	bool vfo = getVFO();
-	if (!eepromValidData) { return; }
+	if (!eepromValidData) { return false; }
 
 	// get the vfo band
 	byte band = getBandVFO(vfo);
-	if (!eepromValidData) { return; }
+	if (!eepromValidData) { return false; }
 
 	// calc the base address
 	unsigned int address = 0x7D + ((int)vfo * 390) + (band * 26);
@@ -550,15 +600,12 @@ bool FT817::writeEEPROM(byte data)
 	while (count > 0)
 	{
 		temp = readEEPROM();
-		if (eepromValidData)
-		{
-			break;
-		}
 		count -= 1;
+		if (eepromValidData) { break; }
 	}
 
 	// check if valid data
-	if (!eepromValidData) 
+	if (!eepromValidData) { return false; }
 
 	// compare
 	if (temp != data) { return false; } else { return true; }

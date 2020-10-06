@@ -340,6 +340,8 @@ class FT817
 		void clar(boolean toggle);		// clar on / clar off
 		void split(boolean toggle);		// split / single
 		void toggleVFO();				// switch to the other VFO
+		bool toggleNar();				// toggle the actual narrow status for the current VFO, switching
+										// breifly to the other VFO and back, returns true is success
 		// set commands
 		void setFreq(long freq);		// in 10' of hz
 		void setMode(byte mode);		// in text

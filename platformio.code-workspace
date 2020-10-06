@@ -10,6 +10,12 @@
 	"settings": {
 		"cSpell.enableFiletypes": [
 			"cpp"
-		]
+		],
+		"files.associations": {
+			"*.cf": "shellscript",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp"
+		}
 	}
 }
