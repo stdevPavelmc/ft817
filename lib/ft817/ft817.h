@@ -331,48 +331,54 @@ class FT817
 {
 	public:
 		FT817();
-		void setSerial(SoftwareSerial portInfo);
-		void begin(int baud);
-
-		void lock(boolean toggle);
-		void PTT(boolean toggle);
-		void setFreq(long freq);
-		void setMode(char * mode);
-		void clar(boolean toggle);
+		// setup
+		void setSerial(SoftwareSerial portInfo);	// load the softserial into the FT817
+		void begin(int baud);						// set the baudrate of the softserial lib 
+		// toggles
+		void lock(boolean toggle);		// lock/unlock
+		void PTT(boolean toggle);		// ptt/un-ptt
+		void clar(boolean toggle);		// clar on / clar off
+		void split(boolean toggle);		// split / single
+		void toggleVFO();				// switch to the other VFO
+		// set commands
+		void setFreq(long freq);		// in 10' of hz
+		void setMode(byte mode);		// in text
 		void clarFreq(long freq);
-		bool getVFO();
-		void toggleVFO();
-		void switchVFO(bool vfo);	// 0 = A / 1 = B (checks the actual VFO)
-		void split(boolean toggle);
-		void rptrOffset(char * ofst);
+		void switchVFO(bool vfo); // 0 = A / 1 = B (checks the actual VFO)
+		void rptrOffset(char *ofst);
 		void rptrOffsetFreq(long freq);
 		void squelch(char * mode);
 		void squelchFreq(unsigned int, char * sqlType);
+		// get commands
+		bool getVFO();
 		byte getMode();
 		unsigned long getFreqMode();
+		byte getBandVFO(bool);
 		boolean chkTX();
-		void flushRX();
 		byte getDisplaySelection();
 		byte getSMeter();
-		bool eepromValidData = false;
-		byte getBandVFO(bool);
+		// vars
+		bool eepromValidData = false;	// true of false of the last eeprom read
 
-	private : unsigned char *converted; // holds the converted freq
+	private:
+		// private & aux functions ands proceduies
+		void getBytes(byte count);		// get 5 bytes and place it on the buffer MSBF
+		byte getByte();					// get a single byte and return it
+		void flushRX();					// empty any char in the softserial buffer
+		void flushBuffer();				// zeroing the buffer
+		byte readEEPROM(byte msb, byte lsb);	// read the eeprom, return a byte
+												// if it return the same value two
+												// times in a row we flag the data
+												// as valid via eepromValidData
+		void sendCmd();					// send the commands in the buffer
+		byte singleCmd(int cmd);		// simplifies small cmds
+		unsigned long from_bcd_be();	// convert the first 4 bytes in buffer to a freq in 10' of hz
+		void to_bcd_be(unsigned long freq);		// get a freq in 10'of hz and place it on the buffer
+
+		// vars
 		unsigned long freq;			// frequency data as a long
-		void getBytes(byte count);	// get 5 bytes and place it on the buffer MSBF
-		byte getByte();				// get a single byte as an answer to a command 
+		byte mode;					// last mode read
 		unsigned char buffer[5];	// buffer used to TX and RX data to the radio
-		void flushBuffer();			// zeroing the buffer
-		byte readEEPROM(byte msb, byte lsb);
-		byte mode;
-
-		void sendCmd();
-		byte singleCmd(int cmd);	// simplifies small cmds
-
-		void sendByte(byte cmd);
-		unsigned long from_bcd_be();
-		void to_bcd_be(unsigned long freq);
-		void comError(char * string);
 };
 
 #endif

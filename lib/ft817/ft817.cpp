@@ -104,6 +104,12 @@ void FT817::split(boolean toggle)
 	}
 }
 
+// toggle VFO (A or B)
+void FT817::toggleVFO()
+{
+	singleCmd(CAT_VFO_AB);
+}
+
 /****** SET COMMANDS ********/
 
 // set radio frequency directly (as a long integer)
@@ -116,46 +122,23 @@ void FT817::setFreq(long freq)
 	getByte();
 }
 
-// set radio mode using human friendly terms (ie. USB)
-void FT817::setMode(char * mode)
+// set radiomode using define values
+void FT817::setMode(byte mode)
 {
-	flushBuffer();
-	buffer[0] = CAT_MODE_USB;  // default to USB mode
-	buffer[4] = CAT_MODE_SET;  // command byte
-
-	if (strcasecmp(mode, "LSB") == 0)
-		buffer[0] = CAT_MODE_LSB;
-	if (strcasecmp(mode, "USB") == 0)
-		buffer[0] = CAT_MODE_USB;
-	if (strcasecmp(mode, "CW") == 0)
-		buffer[0] = CAT_MODE_CW;
-	if (strcasecmp(mode, "CWR") == 0)
-		buffer[0] = CAT_MODE_CWR;
-	if (strcasecmp(mode, "AM") == 0)
-		buffer[0] = CAT_MODE_AM;
-	if (strcasecmp(mode, "FM") == 0)
-		buffer[0] = CAT_MODE_FM;
-	if (strcasecmp(mode, "DIG") == 0)
-		buffer[0] = CAT_MODE_DIG;
-	if (strcasecmp(mode, "PKT") == 0)
-		buffer[0] = CAT_MODE_PKT;
-	if (strcasecmp(mode, "WBFM") == 0)
-		buffer[0] = CAT_MODE_WBFM;
-
-	sendCmd();
-	getByte();
+	// check for valid modes
+	if (mode < 0x05 | mode == 0x06 | mode == 0x08 | mode == 0x0A | mode == 0x0C)
+	{
+		flushBuffer();
+		buffer[0] = mode;
+		buffer[4] = CAT_MODE_SET;
+		getByte();
+	}
 }
 
 // set the clarifier frequency
 void FT817::clarFreq(long freq)
 {
 	// will come back to this later
-}
-
-// toggle VFO (A or B)
-void FT817::toggleVFO()
-{
-	singleCmd(CAT_VFO_AB);
 }
 
 // switch to a specific VFO
@@ -184,6 +167,7 @@ void FT817::rptrOffset(char * ofst)
 	getByte();
 }
 
+// set the freq of the offset
 void FT817::rptrOffsetFreq(long freq)
 {
 	freq = (freq * 100); // convert the incoming value to kHz
@@ -320,13 +304,6 @@ byte FT817::getSMeter()
 }
 
 /****** AUX PRIVATE  ********/
-
-// spit out any DEBUG data via this function
-void FT817::comError(char * string)
-{
-	Serial.println("Communication Error!");
-	Serial.println(string);
-}
 
 // gets a byte of input data from the radio
 byte FT817::getByte()

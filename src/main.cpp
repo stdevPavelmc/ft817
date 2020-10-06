@@ -42,51 +42,51 @@ void loop()
     Serial.println(F("Radio Unlocked, please check"));
     delay(dly);
 
-    radio.setMode("pkt"); // set mode to PKT (note these mode names are NOT case sensitive!)
+    radio.setMode(CAT_MODE_PKT); // set mode to PKT (note these mode names are NOT case sensitive!)
     Serial.println(F("Radio mode: PKT, please check"));
     delay(dly);
 
-    radio.setMode("AM"); // set mode to AM
+    radio.setMode(CAT_MODE_AM); // set mode to AM
     Serial.println(F("Radio Mode: AM, please check"));
     delay(dly);
 
-    radio.setMode("USB"); // set mode to USB
+    radio.setMode(CAT_MODE_USB); // set mode to USB
     Serial.println(F("Radio Mode USB, please check"));
     delay(dly);
 
-    radio.setMode("LSB"); // set mode to LSB
+    radio.setMode(CAT_MODE_LSB); // set mode to LSB
     Serial.println(F("Radio Mode LSB, please check"));
     delay(dly);
 
-    radio.setMode("CW"); // set mode to CW
+    radio.setMode(CAT_MODE_CW); // set mode to CW
     Serial.println(F("Radio Mode CW, please check"));
     delay(dly);
 
-    radio.setMode("CWR"); // set mode to CW-R
+    radio.setMode(CAT_MODE_CWR); // set mode to CW-R
     Serial.println(F("Radio Mode CW-R, please check"));
     delay(dly);
 
-    radio.setMode("DIG"); // set mode to DIG
+    radio.setMode(CAT_MODE_DIG); // set mode to DIG
     Serial.println(F("Radio Mode DIG, please check"));
     delay(dly);
 
-    radio.setMode("FM"); // set mode to FM
+    radio.setMode(CAT_MODE_FM); // set mode to FM
     Serial.println(F("Radio Mode FM, please check"));
     delay(dly);
 
     radio.setFreq(10150000);
-    radio.setMode("WBFM"); // set mode to WBFM
+    radio.setMode(CAT_MODE_WBFM); // set mode to WBFM
     Serial.println(F("Radio Mode WBFM (Broadcast band), please check"));
     delay(dly);
 
     radio.setFreq(1407000); // set VFO frequency to xx
-    radio.setMode("USB");   // set mode to USB
+    radio.setMode(CAT_MODE_USB); // set mode to USB
     Serial.println(F("Radio set to USB in 14.070Mhz, please check"));
     delay(dly);
 
     // perform a frequency sweep
     Serial.println(F("Doing a sweep up in the 2m band, please check"));
-    radio.setMode("FM"); // set mode to FM
+    radio.setMode(CAT_MODE_FM); // set mode to FM
     for (long freq = 0; freq<100; freq++)
     {
         radio.setFreq(14500000 + freq * 500);
