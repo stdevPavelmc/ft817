@@ -383,8 +383,11 @@ class FT817
 		unsigned long freq;			// frequency data as a long
 		byte mode;					// last mode read
 		unsigned char buffer[5];	// buffer used to TX and RX data to the radio
-		byte MSB;					// MSB of the eeprom address |
-		byte LSB;					// LSB of the eeprom address | both used to calculate the  
+		byte MSB;					// MSB of the eeprom address | both used to calculate the address of
+		byte LSB;					// LSB of the eeprom address | the eeprom
+		byte nextByte;				// Next byte, aka: when you read or write you always get/set two bytes
+									// for some operations we need to know that byte
+
 };
 
 #endif

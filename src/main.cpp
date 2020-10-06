@@ -184,8 +184,8 @@ void loop()
     }
     delay(dly);
 
-        // display
-        byte ds = radio.getDisplaySelection();
+    // display
+    byte ds = radio.getDisplaySelection();
     Serial.print(F("Radio display selection is "));
     Serial.print(ds);
     Serial.println(F(" please check"));
@@ -196,6 +196,14 @@ void loop()
     Serial.print(F("Radio S-Meter value is 0x"));
     Serial.print(sm, HEX);
     Serial.println(F(", please check"));
+    delay(dly);
+
+    // get Nar status of the actual channel
+    bool Nar = radio.getNar();
+    Serial.print(F("Radio VFO Narrow state in this channel is: "));
+    Serial.print(Nar);
+    Serial.println(F(", please check"));
+    delay(dly);
 
     // end
     Serial.println(F("Radio test end, will restart in 10 seconds..."));

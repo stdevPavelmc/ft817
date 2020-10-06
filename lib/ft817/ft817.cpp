@@ -416,6 +416,7 @@ byte FT817::readEEPROM()
 		else
 		{
 			data = buffer[0];
+			nextByte = buffer[1];
 		}
 
 		delay(50); // mandatory delay
