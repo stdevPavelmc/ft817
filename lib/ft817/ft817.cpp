@@ -486,7 +486,25 @@ void FT817::calcVFOaddr()
 	unsigned int address = 0x7D + ((int)vfo * 390) + (band * 26);
 
 	// load it on the MSB/LSB
-	MSB = (byte)(address >> 8);
-	LSB = (byte)(address & 0xff);
+	modAddr(address, 0);
 }
 
+// Increment the address in MSB/LSB in a safe way
+// you can pass "1" o "-10" safely as an variaton
+// if address = 0 then load the values from MSB/LSB
+// if you pass an address and zero variation it just
+// load the values of address in the MSB/LSB
+void FT817::modAddr(int address, signed int variation)
+{
+	if (address == 0)
+	{
+		// we need to work with the address in the MSB/LSB
+		address = ((int)MSB << 8) + LSB;
+	}
+
+	// modify it
+	address += variation;
+
+	MSB = (byte)(address >> 8);
+	LSB = (byte)(address & 0xFF);
+}

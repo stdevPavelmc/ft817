@@ -377,6 +377,8 @@ class FT817
 		void to_bcd_be(unsigned long freq);		// get a freq in 10'of hz and place it on the buffer
 		void calcVFOaddr();				// calc the VFO address and place it on the MSB/LSB address
 										// if calculations are correct eepromValidData will be true
+		void modAddr(int address, signed int variation);	// modify an address with the variation
+															// if address is zero load it from MSB/LSB
 		// vars
 		unsigned long freq;			// frequency data as a long
 		byte mode;					// last mode read
