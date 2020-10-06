@@ -324,28 +324,19 @@ bool FT817::getNar()
 	}
 
 	// at this point we must have a correct readding
-	// get the next byte from the base address, fail safe if
-	// ond edge
-	if (LSB == 255)
-	{
-		MSB += 1;
-		LSB = 0x00;
-	}
-	else
-	{
-		LSB +=1;
-	}
+	
+	// we are targeting base address + 1
+	modAddr(0, 1);
 
 	// get the final value and return it
 	byte temp = readEEPROM();
 	return (bool)(bitRead(temp, 4));
 }
 
-	/****** AUX PRIVATE  ********/
+/****** AUX PRIVATE  ********/
 
-	// gets a byte of input data from the radio
-	byte
-	FT817::getByte()
+// gets a byte of input data from the radio
+byte FT817::getByte()
 {
 	unsigned long startTime = millis();
 	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }
