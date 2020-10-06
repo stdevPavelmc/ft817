@@ -360,6 +360,7 @@ class FT817
 		byte getDisplaySelection();		// return a number that represents the row (see notes in the header of this file)
 		byte getSMeter();				// as a byte (see notes in the header of this file)
 		bool getNar();					// get the actual narrow status for the current VFO
+		bool getIPO();					// get the IPO status for the actual VFO 
 		// vars
 		bool eepromValidData = false;	// true of false of the last eeprom read will read 3 times
 										// if two give same values on a row we flag it as valid

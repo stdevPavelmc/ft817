@@ -371,8 +371,7 @@ byte FT817::getSMeter()
 }
 
 // get narrow state for the actual VFO
-// narrow state is the base address + 1
-// then bit 4 in that byte
+// NAR is bit 4 in byte (base address + 1)
 bool FT817::getNar()
 {
 	// try to get the base address to the actual VFO
@@ -391,6 +390,31 @@ bool FT817::getNar()
 	// get the final value and return it
 	byte temp = readEEPROM();
 	return (bool)(bitRead(temp, 4));
+}
+
+// get IPO state for the actual VFO
+// IPO is bit 5 in byte (base address + 2)
+bool FT817::getIPO()
+{
+	// try to get the base address to the actual VFO
+	byte count = 3;
+	while (!calcVFOaddr())
+	{
+		count -= 1;
+		if (count == 0)
+		{
+			break;
+		}
+	}
+
+	// at this point we must have a correct reading, we hope...
+
+	// we are targeting base address + 2
+	modAddr(0, 2);
+
+	// get the final value and return it
+	byte temp = readEEPROM();
+	return (bool)(bitRead(temp, 5));
 }
 
 /****** AUX PRIVATE  ********/
