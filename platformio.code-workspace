@@ -7,5 +7,9 @@
 			"path": "../../Software/FT-817 works/ft817_buddy/Arduino/sketch"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"cSpell.enableFiletypes": [
+			"cpp"
+		]
+	}
 }

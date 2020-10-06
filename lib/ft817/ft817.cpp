@@ -216,6 +216,16 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 	getByte();
 }
 
+// Set the narrow value for the actual VFO, with a fast switch of the VFO
+// to apply, this does not check for the actual value, just apply the value
+bool setNar(bool value)
+{
+	// Narrow values is the actual VFO base address + 1 byte
+	// then the 4 bit in that bytes
+
+
+}
+
 /****** GET COMMANDS ********/
 
 // get the actual vfo from the eeprom
@@ -317,14 +327,13 @@ bool FT817::getNar()
 {
 	// try to get the base address to the actual VFO
 	byte count = 3;
-	while (count > 0)
+	while (!calcVFOaddr())
 	{
-		calcVFOaddr();
-		if (eepromValidData) {break;}
 		count -= 1;
+		if (count == 0) {break;}
 	}
 
-	// at this point we must have a correct readding
+	// at this point we must have a correct reading, we hope...
 	
 	// we are targeting base address + 1
 	modAddr(0, 1);
@@ -462,10 +471,11 @@ void FT817::to_bcd_be(unsigned long f)
 	}
 }
 
-// calc the eeprom base address of the actual VFO
-// if calculations are right eepromValidData is set to true
-// MSB/LSB will have the target base address
-void FT817::calcVFOaddr()
+// calc the eeprom base address of the actual VFO, returns true/false
+// true is a confirmation of the eeprom readdings confirmed, also
+// eepromValidData has the result also, the target base address will be 
+// loaded to MSB/LSB
+bool FT817::calcVFOaddr()
 {
 	// get the current vfo
 	bool vfo = getVFO();
@@ -480,6 +490,9 @@ void FT817::calcVFOaddr()
 
 	// load it on the MSB/LSB
 	modAddr(address, 0);
+
+	// return
+	return true;
 }
 
 // Increment the address in MSB/LSB in a safe way
@@ -527,6 +540,7 @@ bool FT817::writeEEPROM(byte data)
 	buffer[3] = nextByte;
 	buffer[4] = 0xBC;
 	sendCmd();
+	getByte();
 
 	// almost all eeproms have a write delay, from 1 to 5 msecs we go here for 2 msec, this must be adjusted in practice
 	delay (2);
