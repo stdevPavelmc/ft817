@@ -379,6 +379,10 @@ class FT817
 										// if calculations are correct eepromValidData will be true
 		void modAddr(int address, signed int variation);	// modify an address with the variation
 															// if address is zero load it from MSB/LSB
+		bool writeEEPROM(byte data);	// write data (performs a read cycle inside to preserve nextByte)
+										// address is loaded from MSB/LSB, if all good return true
+										// it returns true if all gone OK and can verify the integrity of
+										// the wrote data.
 		// vars
 		unsigned long freq;			// frequency data as a long
 		byte mode;					// last mode read

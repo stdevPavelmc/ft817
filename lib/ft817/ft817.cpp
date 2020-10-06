@@ -320,7 +320,8 @@ bool FT817::getNar()
 	while (count > 0)
 	{
 		calcVFOaddr();
-		if (eepromValidData) {break;} 
+		if (eepromValidData) {break;}
+		count -= 1;
 	}
 
 	// at this point we must have a correct readding
@@ -500,3 +501,52 @@ void FT817::modAddr(int address, signed int variation)
 	MSB = (byte)(address >> 8);
 	LSB = (byte)(address & 0xFF);
 }
+
+// write to the eeprom, the address is loaded from the MSB/LSB
+// we pass the byte to write and load the nextByte from the last read
+// if all goes well we return true, otherwise false 
+bool FT817::writeEEPROM(byte data)
+{
+	// perform a read cycle to load the nextByte, with some insistence..
+	byte count = 3;
+	byte temp;
+	while (count > 0)
+	{
+		temp = readEEPROM();
+		if (eepromValidData) { break; }
+		count -= 1;
+	}
+
+	// test
+	if (!eepromValidData) { return false; }
+
+	// load the data in the buffer, no need to flush it
+	buffer[0] = MSB;
+	buffer[1] = LSB;
+	buffer[2] = data;
+	buffer[3] = nextByte;
+	buffer[4] = 0xBC;
+	sendCmd();
+
+	// almost all eeproms have a write delay, from 1 to 5 msecs we go here for 2 msec, this must be adjusted in practice
+	delay (2);
+
+	// read it & check
+	count = 3;
+	while (count > 0)
+	{
+		temp = readEEPROM();
+		if (eepromValidData)
+		{
+			break;
+		}
+		count -= 1;
+	}
+
+	// check if valid data
+	if (!eepromValidData) 
+
+	// compare
+	if (temp != data) { return false; } else { return true; }
+}
+
