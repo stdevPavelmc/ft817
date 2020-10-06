@@ -375,6 +375,8 @@ class FT817
 		byte singleCmd(int cmd);		// simplifies small cmds
 		unsigned long from_bcd_be();	// convert the first 4 bytes in buffer to a freq in 10' of hz
 		void to_bcd_be(unsigned long freq);		// get a freq in 10'of hz and place it on the buffer
+		void calcVFOaddr();				// calc the VFO address and place it on the MSB/LSB address
+										// if calculations are correct eepromValidData will be true
 		// vars
 		unsigned long freq;			// frequency data as a long
 		byte mode;					// last mode read

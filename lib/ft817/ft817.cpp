@@ -220,6 +220,7 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 
 // get the actual vfo from the eeprom
 // 0 = A / 1 = B
+// only valid if eepromDataValid is true
 bool FT817::getVFO()
 {
 	MSB = 0x00;	// set the address to read
@@ -434,4 +435,25 @@ void FT817::to_bcd_be(unsigned long f)
 		f /= 10;
 		buffer[i] = a;
 	}
+}
+
+// calc the eeprom base address of the actual VFO
+// if calculations are right eepromValidData is set to true
+// MSB/LSB will have the target base address
+void FT817::calcVFOaddr()
+{
+	// get the current vfo
+	bool vfo = getVFO();
+	if (!eepromValidData) { return; }
+
+	// get the vfo band
+	byte band = getBandVFO(vfo);
+	if (!eepromValidData) { return; }
+
+	// calc the base address
+	unsigned int address = 0x7D + ((int)vfo * 390) + (band * 26);
+
+	// load it on the MSB/LSB
+	MSB = (byte)(address >> 8);
+	LSB = (byte)(address & 0xff);
 }
