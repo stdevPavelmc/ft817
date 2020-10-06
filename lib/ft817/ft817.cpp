@@ -310,10 +310,42 @@ byte FT817::getSMeter()
 	return getByte() & 0b00001111;
 }
 
-/****** AUX PRIVATE  ********/
+// get narrow state for the actual VFO
+// narrow state is the base address + 1
+// then bit 4 in that byte
+bool FT817::getNar()
+{
+	// try to get the base address to the actual VFO
+	byte count = 3;
+	while (count > 0)
+	{
+		calcVFOaddr();
+		if (eepromValidData) {break;} 
+	}
 
-// gets a byte of input data from the radio
-byte FT817::getByte()
+	// at this point we must have a correct readding
+	// get the next byte from the base address, fail safe if
+	// ond edge
+	if (LSB == 255)
+	{
+		MSB += 1;
+		LSB = 0x00;
+	}
+	else
+	{
+		LSB +=1;
+	}
+
+	// get the final value and return it
+	byte temp = readEEPROM();
+	return (bool)(bitRead(temp, 4));
+}
+
+	/****** AUX PRIVATE  ********/
+
+	// gets a byte of input data from the radio
+	byte
+	FT817::getByte()
 {
 	unsigned long startTime = millis();
 	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }
@@ -457,3 +489,4 @@ void FT817::calcVFOaddr()
 	MSB = (byte)(address >> 8);
 	LSB = (byte)(address & 0xff);
 }
+
