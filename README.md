@@ -7,6 +7,7 @@ This is a CAT library to interface with a Yaesu FT-817 radio, with a lot of STAM
 - [James Buck, VE3BUX FT-857D library](http://www.ve3bux.com)
 - [KA7OEI FT-817 pages](http://www.ka7oei.com/ft817pg.shtml)
 - [Andy Webster FT-817_Buddy project](https://github.com/g7uhn/ft817_buddy)
+- [Jordan Rubin (KJ4TLB) Perl Module for FT-817](https://metacpan.org/pod/Ham::Device::FT817COMM)
 
 ## Goal
 
