@@ -343,22 +343,23 @@ class FT817
 		// set commands
 		void setFreq(long freq);		// in 10' of hz
 		void setMode(byte mode);		// in text
-		void clarFreq(long freq);
-		void switchVFO(bool vfo); // 0 = A / 1 = B (checks the actual VFO)
-		void rptrOffset(char *ofst);
+		void clarFreq(long freq);		// 
+		void switchVFO(bool vfo);		// 0 = A / 1 = B, checks the actual VFO to know if need to change
+		void rptrOffset(char *ofst);	// "-" / "+" / "s"
 		void rptrOffsetFreq(long freq);
 		void squelch(char * mode);
 		void squelchFreq(unsigned int, char * sqlType);
 		// get commands
-		bool getVFO();
-		byte getMode();
-		unsigned long getFreqMode();
-		byte getBandVFO(bool);
-		boolean chkTX();
-		byte getDisplaySelection();
-		byte getSMeter();
+		bool getVFO();					// return the actual VFO: 0 = A / 1 = B
+		byte getMode();					// return a byte with the mode
+		unsigned long getFreqMode();	// in 10' of hz
+		byte getBandVFO(bool);			// return the band (see notes in the header of this file)
+		boolean chkTX();				//
+		byte getDisplaySelection();		// return a number that represents the row (see notes in the header of this file)
+		byte getSMeter();				// as a byte (see notes in the header of this file)
 		// vars
-		bool eepromValidData = false;	// true of false of the last eeprom read
+		bool eepromValidData = false;	// true of false of the last eeprom read will read 3 times
+										// if two give same values on a row we flag it as valid
 
 	private:
 		// private & aux functions ands proceduies
