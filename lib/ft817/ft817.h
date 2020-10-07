@@ -369,7 +369,7 @@ class FT817
 		bool getNar();					// get the actual narrow status for the current VFO
 		bool getIPO();					// get the IPO status for the actual VFO
 		bool getBreakIn();				// get the Break In operation status
-		bool geteKeyer();				// toggle Keyer
+		bool getKeyer();				// toggle Keyer
 
 		// vars
 		bool eepromValidData = false;	// true of false of the last eeprom read will read 3 times
