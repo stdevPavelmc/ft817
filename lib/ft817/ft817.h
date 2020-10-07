@@ -340,7 +340,9 @@ class FT817
 		void clar(boolean toggle);		// clar on / clar off
 		void split(boolean toggle);		// split / single
 		void toggleVFO();				// switch to the other VFO
-		bool toggleNar();				// toggle the actual narrow status for the current VFO, switching
+		bool toggleNar();				// toggle the narrow status for the current VFO, switching
+										// breifly to the other VFO and back, returns true is success
+		bool toggleIPO();				// toggle the IPO status for the current VFO, switching
 										// breifly to the other VFO and back, returns true is success
 		// set commands
 		void setFreq(long freq);		// in 10' of hz
@@ -371,9 +373,6 @@ class FT817
 		byte getByte();					// get a single byte and return it
 		void flushRX();					// empty any char in the softserial buffer
 		void flushBuffer();				// zeroing the buffer
-		byte readEEPROM();				// read the eeprom, return a byte, MSB & LSB is taken from
-										// the object vars; if it return the same value two time
-										// in a row we flag the data as valid via eepromValidData
 		void sendCmd();					// send the commands in the buffer
 		byte singleCmd(int cmd);		// simplifies small cmds
 		unsigned long from_bcd_be();	// convert the first 4 bytes in buffer to a freq in 10' of hz
@@ -383,16 +382,27 @@ class FT817
 										// and that value will be returned also
 		void modAddr(int address, signed int variation);	// modify an address with the variation
 															// if address is zero load it from MSB/LSB
+		bool readEEPROM();				// read the eeprom, return bool, true if success, false otherwise
+										// eeprom address is read from the MSB & LSB variables
+										// it returns two bytes, that are loaded in actualByte & nextByte
 		bool writeEEPROM(byte data);	// write data (performs a read cycle inside to preserve nextByte)
 										// address is loaded from MSB/LSB, if all good return true
 										// it returns true if all gone OK and can verify the integrity of
 										// the wrote data.
+		bool getBitFromVFO(signed int offset, byte rbit);	// this is a nice trick, it will return the bit
+															// position you want in the actual VFO with an
+															// offset in bytes...
+		bool toggleBitFromVFO(signed int offset, byte rbit);	// this is another a nice trick, this will allow us to
+																// toggle any bit position in the offset byte for the actual
+																// base VFO
+
 		// vars
-		unsigned long freq;			// frequency data as a long
+		unsigned long freq;		// frequency data as a long
 		byte mode;					// last mode read
 		unsigned char buffer[5];	// buffer used to TX and RX data to the radio
 		byte MSB;					// MSB of the eeprom address | both used to calculate the address of
 		byte LSB;					// LSB of the eeprom address | the eeprom
+		byte actualByte;			// Actual byte requested by any EEPROM read operation
 		byte nextByte;				// Next byte, aka: when you read or write you always get/set two bytes
 									// for some operations we need to know that byte
 

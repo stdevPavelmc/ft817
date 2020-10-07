@@ -218,62 +218,20 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 	getByte();
 }
 
-// Toggle the narrow value for the actual VFO, with a fast switch of the VFO
-// to apply, we check if the state is already as you asked to avoid writing
-// and wearing the EEPROM.
+// Toggle the narrow value for the actual VFO
+// with a fast switch of the VFO to apply
+// NAR is bit 4 in byte base address + 1
 bool FT817::toggleNar()
 {
-	// Narrow values is the actual VFO base address + 1 byte
-	// then the 4 bit in that byte
+	return toggleBitFromVFO(1, 4);
+}
 
-	// try to get the base address to the actual VFO
-	byte count = 3;
-	while (!calcVFOaddr())
-	{
-		count -= 1;
-		if (count == 0) { break; }
-	}
-
-	// success?
-	if (!eepromValidData) { return false; }
-
-	// we have the base for this VFO, add one byte
-	modAddr(0, 1);
-
-	// get the byte with failsafe actions and the nextByte
-	byte actualData = readEEPROM();
-	count = 3;
-	while (!eepromValidData)
-	{
-		count -= 1;
-		actualData = readEEPROM();
-		if (count == 0) { break; }
-	}
-
-	// success?
-	if (!eepromValidData) { return false; }
-
-	// get the nar status
-	bool val = bitRead(actualData, 4);
-	// mod the data with inverted nar value
-	byte newData = bitWrite(actualData, 4, !val);
-
-	// program it back, but first switch the vfo
-	toggleVFO();
-
-	// write it back, with provisions
-	count = 3;
-	while (!writeEEPROM(newData))
-	{
-		count -= 1;
-		if (count == 0) { break; }
-	}
-
-	// switch VFO back to target one no matter if success or not
-	toggleVFO();
-
-	// success?
-	if (eepromValidData) { return true; } else { return false; }
+// Toggle the IPO value for the actual VFO
+// with a fast switch of the VFO to apply
+// NAR is bit 5 in byte base address + 2
+bool FT817::toggleIPO()
+{
+	return toggleBitFromVFO(2, 5);
 }
 
 /****** GET COMMANDS ********/
@@ -371,50 +329,17 @@ byte FT817::getSMeter()
 }
 
 // get narrow state for the actual VFO
-// NAR is bit 4 in byte (base address + 1)
+// NAR is bit 4 in byte base address + 1
 bool FT817::getNar()
 {
-	// try to get the base address to the actual VFO
-	byte count = 3;
-	while (!calcVFOaddr())
-	{
-		count -= 1;
-		if (count == 0) {break;}
-	}
-
-	// at this point we must have a correct reading, we hope...
-	
-	// we are targeting base address + 1
-	modAddr(0, 1);
-
-	// get the final value and return it
-	byte temp = readEEPROM();
-	return (bool)(bitRead(temp, 4));
+	return getBitFromVFO(1, 4);
 }
 
 // get IPO state for the actual VFO
-// IPO is bit 5 in byte (base address + 2)
+// IPO is bit 5 in byte base address + 2
 bool FT817::getIPO()
 {
-	// try to get the base address to the actual VFO
-	byte count = 3;
-	while (!calcVFOaddr())
-	{
-		count -= 1;
-		if (count == 0)
-		{
-			break;
-		}
-	}
-
-	// at this point we must have a correct reading, we hope...
-
-	// we are targeting base address + 2
-	modAddr(0, 2);
-
-	// get the final value and return it
-	byte temp = readEEPROM();
-	return (bool)(bitRead(temp, 5));
+	return getBitFromVFO(2, 5);
 }
 
 /****** AUX PRIVATE  ********/
@@ -476,13 +401,13 @@ void FT817::flushBuffer()
 	memset(buffer, 0, 5);
 }
 
-// read a position in the EEPROM MSB & LSB are taken from
-// the object values, we set the the variable eepromValidData
-// to true if it return the same value two times in a row
-byte FT817::readEEPROM()
+// read a position in the EEPROM from the MSB & LSB vars
+// returns true if valid data (same value two times in a row)
+// false if no valid data
+// it loads two bytes, they are placed in actualByte & nextByte
+bool FT817::readEEPROM()
 {
 	// there is evidence that this fails?
-	byte data = 0;
 	eepromValidData = false;
 	for (byte i=0; i<4; i++)
 	{
@@ -492,21 +417,72 @@ byte FT817::readEEPROM()
 		buffer[4] = 0xBB; // BB command byte (read EEPROM data)sendCmd();
 		sendCmd();
 		getBytes(2);
-		if ((i > 0) & (data == buffer[0]))
+		if ((i > 0) & ((actualByte == buffer[0]) & (nextByte == buffer[1])))
 		{
 			eepromValidData = true;
 			break;
 		}
 		else
 		{
-			data = buffer[0];
+			actualByte = buffer[0];
 			nextByte = buffer[1];
 		}
 
 		delay(50); // mandatory delay
 	}
 
-	return data;
+	return eepromValidData;
+}
+
+// write to the eeprom, the address is loaded from the MSB/LSB
+// we pass the byte to write and load the nextByte from the last read
+// if all goes well we return true, otherwise false
+bool FT817::writeEEPROM(byte data)
+{
+	// perform a read cycle to load the nextByte, with some insistence..
+	byte count = 3;
+	while (!readEEPROM())
+	{
+		if (count == 0) { break; }
+		count -= 1;
+	}
+
+	// test
+	if (!eepromValidData) { return eepromValidData; }
+
+	// load the data in the buffer, no need to flush it as it will be overwritten
+	buffer[0] = MSB;
+	buffer[1] = LSB;
+	buffer[2] = data;
+	buffer[3] = nextByte;
+	buffer[4] = 0xBC;	// EEPROM WRITE (JUST ONE TIME)
+	sendCmd();
+	getByte();
+
+	// almost all EEPROMs have a write delay, from 1 to 5 msecs
+	// we go here for 5 msec, this must be adjusted in practice
+	delay(5);
+
+	// read it & check
+	count = 3;
+	while (!readEEPROM())
+	{
+		if (count == 0) { break; }
+		count -= 1;
+	}
+
+	// test
+	if (!eepromValidData) { return eepromValidData; }
+
+	// compare
+	if (actualByte != data)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 // get the bytes in the buffer and return it
@@ -589,49 +565,68 @@ void FT817::modAddr(int address, signed int variation)
 	LSB = (byte)(address & 0xFF);
 }
 
-// write to the eeprom, the address is loaded from the MSB/LSB
-// we pass the byte to write and load the nextByte from the last read
-// if all goes well we return true, otherwise false 
-bool FT817::writeEEPROM(byte data)
+// Returns the value of a specific bit counting a offset of x bytes
+// from the actual VFO address
+//
+// Must check the eepromValidData to know if it's output is valid 
+bool FT817::getBitFromVFO(signed int offset, byte rbit)
 {
-	// perform a read cycle to load the nextByte, with some insistence..
+	// try to get the base address to the actual VFO
 	byte count = 3;
-	byte temp;
-	while (count > 0)
+	while (!calcVFOaddr())
 	{
-		temp = readEEPROM();
-		if (eepromValidData) { break; }
+		if (count == 0) { break; }
+		count -= 1;
+	}
+
+	// returns false can't calculate the data
+	if (!eepromValidData) { return eepromValidData; }
+
+	// we are targeting base address + 2
+	modAddr(0, offset);
+
+	// get the final value and return it
+	count = 3;
+	while (!readEEPROM())
+	{
+		if (count == 0) { break; }
 		count -= 1;
 	}
 
 	// test
-	if (!eepromValidData) { return false; }
+	if (!eepromValidData) { return eepromValidData; }
 
-	// load the data in the buffer, no need to flush it
-	buffer[0] = MSB;
-	buffer[1] = LSB;
-	buffer[2] = data;
-	buffer[3] = nextByte;
-	buffer[4] = 0xBC;
-	sendCmd();
-	getByte();
-
-	// almost all eeproms have a write delay, from 1 to 5 msecs we go here for 2 msec, this must be adjusted in practice
-	delay (2);
-
-	// read it & check
-	count = 3;
-	while (count > 0)
-	{
-		temp = readEEPROM();
-		count -= 1;
-		if (eepromValidData) { break; }
-	}
-
-	// check if valid data
-	if (!eepromValidData) { return false; }
-
-	// compare
-	if (temp != data) { return false; } else { return true; }
+	// return
+	return (bool)(bitRead(actualByte, rbit));
 }
 
+// Toggle a specific bit from a offset in the actual VFO
+// returns true if success, false otherwise
+bool FT817::toggleBitFromVFO(signed int offset, byte rbit)
+{
+	// get the bit
+	bool targetBit = getBitFromVFO(offset, rbit);
+
+	// success?
+	if (!eepromValidData) { return eepromValidData; }
+
+	// budify the byte with the toggled bit
+	byte newData = bitWrite(actualByte, rbit, !targetBit);
+
+	// program it back, but first switch the vfo
+	toggleVFO();
+
+	// write it back, with provisions
+	byte count = 3;
+	while (!writeEEPROM(newData))
+	{
+		if (count == 0) { break; }
+		count -= 1;
+	}
+
+	// switch VFO back to target one no matter if success or not
+	toggleVFO();
+
+	// success?
+	if (eepromValidData) { return true; } else { return false; }
+}
