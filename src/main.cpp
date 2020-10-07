@@ -225,6 +225,15 @@ void loop()
     Serial.println("Radio toggled the narrow status, please check...");
     delay(dly);
 
+    radio.setFreq(1404000);
+    radio.setMode(CAT_MODE_USB);
+    Serial.println("Radio switched to 14.040 Mhz USB, please note the BreakIn State");
+    Serial.println("it will change in a few seconds");
+    delay(dly);
+    radio.toggleBreakIn();
+    Serial.println("Radio toggled the BrakIn status, please check...");
+    delay(dly);
+
 #endif
 
     // end

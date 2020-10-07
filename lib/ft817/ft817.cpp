@@ -35,6 +35,7 @@ extern SoftwareSerial rigCat(2, 3); // rx,tx
 
 FT817::FT817(){ }	// nothing to do when first instanced
 
+
 /****** SETUP ********/
 
 // Setup software serial with user defined input
@@ -49,6 +50,7 @@ void FT817::begin(int baud)
 {
 	rigCat.begin(baud);
 }
+
 
 /****** TOGGLE COMMANDS ********/
 
@@ -110,6 +112,31 @@ void FT817::toggleVFO()
 	singleCmd(CAT_VFO_AB);
 	// mandatory delay to wait for the radio to apply the changes
 	delay(200);
+}
+
+// Toggle the narrow value for the actual VFO
+// with a fast switch of the VFO to apply
+// NAR is bit 4 in byte base address + 1
+bool FT817::toggleNar()
+{
+	return toggleBitFromVFO(1, 4);
+}
+
+// Toggle the IPO value for the actual VFO
+// with a fast switch of the VFO to apply
+// NAR is bit 5 in byte base address + 2
+bool FT817::toggleIPO()
+{
+	return toggleBitFromVFO(2, 5);
+}
+
+// Toggle the BrakIn option
+// BreakIn is bit 5 of EEPROM byte 58
+bool FT817::toggleBreakIn()
+{
+	MSB = 0x00;
+	LSB = 0x58;
+	return toggleBitFromEEPROM(5);
 }
 
 /****** SET COMMANDS ********/
@@ -218,21 +245,6 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 	getByte();
 }
 
-// Toggle the narrow value for the actual VFO
-// with a fast switch of the VFO to apply
-// NAR is bit 4 in byte base address + 1
-bool FT817::toggleNar()
-{
-	return toggleBitFromVFO(1, 4);
-}
-
-// Toggle the IPO value for the actual VFO
-// with a fast switch of the VFO to apply
-// NAR is bit 5 in byte base address + 2
-bool FT817::toggleIPO()
-{
-	return toggleBitFromVFO(2, 5);
-}
 
 /****** GET COMMANDS ********/
 
@@ -341,6 +353,15 @@ bool FT817::getIPO()
 {
 	return getBitFromVFO(2, 5);
 }
+
+// get BrakIn status from bit 5 in EEPROM address 0x58
+bool FT817::getBreakIn()
+{
+	MSB = 0x00;
+	LSB = 0x58;
+	return getBitFromEEPROM(5);
+}
+
 
 /****** AUX PRIVATE  ********/
 
@@ -563,6 +584,50 @@ void FT817::modAddr(int address, signed int variation)
 
 	MSB = (byte)(address >> 8);
 	LSB = (byte)(address & 0xFF);
+}
+
+// Returns the value of a specific bit from an eeprom address
+// Must check the eepromValidData to know if it's output is valid 
+// Address is get from MSB/LSB
+bool FT817::getBitFromEEPROM(byte rbit)
+{
+	// get the final value and return it
+	byte count = 3;
+	while (!readEEPROM())
+	{
+		if (count == 0) { break; }
+		count -= 1;
+	}
+
+	// test
+	if (!eepromValidData) { return eepromValidData; }
+
+	// return
+	return (bool)(bitRead(actualByte, rbit));
+}
+
+// Toggle a specific bit from a eeprom address loaded in MSB/LSB
+bool FT817::toggleBitFromEEPROM(byte rbit)
+{
+	// get the bit
+	bool targetBit = getBitFromEEPROM(rbit);
+
+	// success?
+	if (!eepromValidData) { return eepromValidData; }
+
+	// modify the byte with the toggled bit
+	byte newData = bitWrite(actualByte, rbit, !targetBit);
+
+	// write it back, with provisions
+	byte count = 3;
+	while (!writeEEPROM(newData))
+	{
+		if (count == 0) { break; }
+		count -= 1;
+	}
+
+	// success?
+	if (eepromValidData) { return true; } else { return false; }
 }
 
 // Returns the value of a specific bit counting a offset of x bytes

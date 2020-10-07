@@ -344,8 +344,9 @@ class FT817
 										// breifly to the other VFO and back, returns true is success
 		bool toggleIPO();				// toggle the IPO status for the current VFO, switching
 										// breifly to the other VFO and back, returns true is success
+		bool toggleBreakIn();			// toggle breakin
 		// set commands
-		void setFreq(long freq);		// in 10' of hz
+		void setFreq(long freq);	// in 10' of hz
 		void setMode(byte mode);		// in text
 		void clarFreq(long freq);		// 
 		void switchVFO(bool vfo);		// 0 = A / 1 = B, checks the actual VFO to know if need to change
@@ -362,7 +363,8 @@ class FT817
 		byte getDisplaySelection();		// return a number that represents the row (see notes in the header of this file)
 		byte getSMeter();				// as a byte (see notes in the header of this file)
 		bool getNar();					// get the actual narrow status for the current VFO
-		bool getIPO();					// get the IPO status for the actual VFO 
+		bool getIPO();					// get the IPO status for the actual VFO
+		bool getBreakIn();				// get the Break In operation status
 		// vars
 		bool eepromValidData = false;	// true of false of the last eeprom read will read 3 times
 										// if two give same values on a row we flag it as valid
@@ -389,6 +391,8 @@ class FT817
 										// address is loaded from MSB/LSB, if all good return true
 										// it returns true if all gone OK and can verify the integrity of
 										// the wrote data.
+		bool getBitFromEEPROM(byte rbit);		// get a bit position from an eeprom address loaded in MSB/LSB
+		bool toggleBitFromEEPROM(byte rbit);	// toggle a bit position from an eeprom address loaded in MSB/LSB
 		bool getBitFromVFO(signed int offset, byte rbit);	// this is a nice trick, it will return the bit
 															// position you want in the actual VFO with an
 															// offset in bytes...
