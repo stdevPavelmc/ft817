@@ -372,7 +372,7 @@ bool FT817::getBreakIn()
 }
 
 // get BrakIn status from bit 4 in EEPROM address 0x58
-bool FT817::getBreakIn()
+bool FT817::getKeyer()
 {
 	MSB = 0x00;
 	LSB = 0x58;
