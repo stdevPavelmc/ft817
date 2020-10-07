@@ -139,6 +139,15 @@ bool FT817::toggleBreakIn()
 	return toggleBitFromEEPROM(5);
 }
 
+// Toggle the Keyer status
+// Keyer is bit 4 of EEPROM byte 58
+bool FT817::toggleBreakIn()
+{
+	MSB = 0x00;
+	LSB = 0x58;
+	return toggleBitFromEEPROM(4);
+}
+
 /****** SET COMMANDS ********/
 
 // set radio frequency directly (as a long integer)
@@ -360,6 +369,14 @@ bool FT817::getBreakIn()
 	MSB = 0x00;
 	LSB = 0x58;
 	return getBitFromEEPROM(5);
+}
+
+// get BrakIn status from bit 4 in EEPROM address 0x58
+bool FT817::getBreakIn()
+{
+	MSB = 0x00;
+	LSB = 0x58;
+	return getBitFromEEPROM(4);
 }
 
 

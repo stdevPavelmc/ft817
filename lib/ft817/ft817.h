@@ -334,6 +334,7 @@ class FT817
 		// setup
 		void setSerial(SoftwareSerial portInfo);	// load the softserial into the FT817
 		void begin(int baud);						// set the baudrate of the softserial lib 
+
 		// toggles
 		void lock(boolean toggle);		// lock/unlock
 		void PTT(boolean toggle);		// ptt/un-ptt
@@ -344,7 +345,9 @@ class FT817
 										// breifly to the other VFO and back, returns true is success
 		bool toggleIPO();				// toggle the IPO status for the current VFO, switching
 										// breifly to the other VFO and back, returns true is success
-		bool toggleBreakIn();			// toggle breakin
+		bool toggleBreakIn();			// toggle BreakIn
+		bool toggleKeyer();				// toggle Keyer status
+
 		// set commands
 		void setFreq(long freq);	// in 10' of hz
 		void setMode(byte mode);		// in text
@@ -354,6 +357,7 @@ class FT817
 		void rptrOffsetFreq(long freq);
 		void squelch(char * mode);
 		void squelchFreq(unsigned int, char * sqlType);
+
 		// get commands
 		bool getVFO();					// return the actual VFO: 0 = A / 1 = B
 		byte getMode();					// return a byte with the mode
@@ -365,6 +369,8 @@ class FT817
 		bool getNar();					// get the actual narrow status for the current VFO
 		bool getIPO();					// get the IPO status for the actual VFO
 		bool getBreakIn();				// get the Break In operation status
+		bool geteKeyer();				// toggle Keyer
+
 		// vars
 		bool eepromValidData = false;	// true of false of the last eeprom read will read 3 times
 										// if two give same values on a row we flag it as valid
