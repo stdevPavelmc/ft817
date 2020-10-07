@@ -141,7 +141,7 @@ bool FT817::toggleBreakIn()
 
 // Toggle the Keyer status
 // Keyer is bit 4 of EEPROM byte 58
-bool FT817::toggleBreakIn()
+bool FT817::toggleKeyer()
 {
 	MSB = 0x00;
 	LSB = 0x58;
