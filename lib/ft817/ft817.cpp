@@ -29,7 +29,7 @@ This allow us to be consistent and save a few bytes of firmware
 #include "ft817.h"
 
 // define software serial IO pins here:
-extern SoftwareSerial rigCat(2, 3); // rx,tx
+extern SoftwareSerial rigCat(12, 11); // rx,tx
 
 #define dlyTime 5	// delay (in ms) after serial writes
 
@@ -169,7 +169,9 @@ void FT817::setMode(byte mode)
 		flushBuffer();
 		buffer[0] = mode;
 		buffer[4] = CAT_MODE_SET;
-		getByte();
+		// missing a sendCmd here...
+		sendCmd();
+		getByte();     
 	}
 }
 
@@ -264,7 +266,7 @@ bool FT817::getVFO()
 {
 	MSB = 0x00;	// set the address to read
 	LSB = 0x55;
-	return (bool)(readEEPROM() & 0b00000001);
+	return (bool((readEEPROM() & 0b00000001)));    // debug in progress here... g7uhn
 }
 
 // get the mode indirectly
@@ -386,8 +388,7 @@ bool FT817::getKeyer()
 byte FT817::getByte()
 {
 	unsigned long startTime = millis();
-	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }
-
+	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }  // I see this came from the VE3BUX lib... but shouldn't something be inside this while{} ? Maybe a timeout?
 	return rigCat.read();
 }
 
@@ -399,9 +400,10 @@ void FT817::getBytes(byte count)
 	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }
 
 	flushBuffer();
-	for (byte i=count; i>0; i--)
+	for (byte i=0; i<count; i++)
 	{
 		buffer[i] = rigCat.read();
+		delay(5);					// needs a delay in here, otherwise the byte sequence read is incorrect
 	}
 }
 
@@ -413,6 +415,7 @@ void FT817::sendCmd()
 	for (byte i=0; i<5; i++)
 	{
 		rigCat.write(buffer[i]);
+//		Serial.println(buffer[i]);        // debug aid
 	}
 }
 
@@ -527,6 +530,7 @@ bool FT817::writeEEPROM(byte data)
 // as a frequency in 10hz resolution
 unsigned long FT817::from_bcd_be()
 {
+	// first four bytes from buffer are the freq data in binary coded decimal
 	// {0x01,0x40,0x07,0x00,0x01} tunes to 14.070MHz
 	freq = 0;
 	for (byte i = 0; i < 4; i++)
