@@ -300,7 +300,8 @@ byte FT817::getBandVFO(bool vfo)
 	// see the band specs in the .h file
 	MSB = 0x00;	// set the address to read
 	LSB = 0x59;
-	byte band = readEEPROM();
+	readEEPROM();
+	byte band = actualByte;
 	if (vfo)
 	{
 		// B
@@ -336,11 +337,13 @@ boolean FT817::chkTX()
 
 // get display selection
 // values from 0x00 to 0x0B
+// only valid if eepromDataValid is true
 byte FT817::getDisplaySelection()
 {
 	MSB = 0x00;	// set the address to read
 	LSB = 0x76;
-	return readEEPROM();
+	readEEPROM();
+	return actualByte & 0b00001111;    // display selection is bits 0-3 of hex address 0x76
 }
 
 // get smeter value

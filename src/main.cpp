@@ -85,26 +85,40 @@ void loop()
     // Serial.println(F("Radio toggled the VFO, please check"));
     // delay(dly);
 
-    // // VFO band one
-    // byte band = radio.getBandVFO(false);
-    // if (radio.eepromValidData)
-    // {
-    //     Serial.print(F("Radio VFO A band is "));
-    //     Serial.print(band, HEX);
-    //     Serial.println(F(", please check"));
-    // }
-    // else
-    // {
-    //     Serial.println(F("Reading the VFO A band failed, please check"));
-    // }
-    // delay(dly);
+    // VFO A band
+    byte bandA = radio.getBandVFO(false);   // for getBandVFO() input, false = VFO A, true = VFO B
+    if (radio.eepromValidData)
+    {
+        Serial.print(F("Radio VFO A band is "));
+        Serial.print(bandA, HEX);
+        Serial.println(F(", please check"));
+    }
+    else
+    {
+        Serial.println(F("Reading the VFO A band failed, please check"));
+    }
+    delay(dly);
 
-    // // Check ABC softkeys
-    // byte ds = radio.getDisplaySelection();
-    // Serial.print(F("Radio display selection is "));
-    // Serial.print(ds);
-    // Serial.println(F(" please check"));
-    // delay(dly);
+    // VFO B band
+    byte bandB = radio.getBandVFO(true);   // for getBandVFO() input, false = VFO A, true = VFO B
+    if (radio.eepromValidData)
+    {
+        Serial.print(F("Radio VFO B band is "));
+        Serial.print(bandB, HEX);
+        Serial.println(F(", please check"));
+    }
+    else
+    {
+        Serial.println(F("Reading the VFO B band failed, please check"));
+    }
+    delay(dly);
+
+    // Check ABC softkeys
+    byte ds = radio.getDisplaySelection();
+    Serial.print(F("Radio display selection is "));
+    Serial.print(ds);
+    Serial.println(F(" please check"));
+    delay(dly);
 
     // // get smeter
     // byte sm = radio.getSMeter();
