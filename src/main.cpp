@@ -64,13 +64,14 @@ void loop()
     bool vfo = radio.getVFO();
     if (radio.eepromValidData)
     {
+        // 0 = VFO A, 1 = VFO B
         if (vfo)
         {
-            Serial.println(F("Radio VFO A active, please check"));
+            Serial.println(F("Radio VFO B active, please check"));
         }
         else
         {
-            Serial.println(F("Radio VFO B active, please check"));
+            Serial.println(F("Radio VFO A active, please check"));
         }
     }
     else
@@ -79,45 +80,45 @@ void loop()
     }
     delay(dly);
 
-    // VFO toggle
-    radio.toggleVFO();
-    Serial.println(F("Radio toggled the VFO, please check"));
-    delay(dly);
+    // // VFO toggle
+    // radio.toggleVFO();
+    // Serial.println(F("Radio toggled the VFO, please check"));
+    // delay(dly);
 
-    // VFO band one
-    byte band = radio.getBandVFO(false);
-    if (radio.eepromValidData)
-    {
-        Serial.print(F("Radio VFO A band is "));
-        Serial.print(band, HEX);
-        Serial.println(F(", please check"));
-    }
-    else
-    {
-        Serial.println(F("Reading the VFO A band failed, please check"));
-    }
-    delay(dly);
+    // // VFO band one
+    // byte band = radio.getBandVFO(false);
+    // if (radio.eepromValidData)
+    // {
+    //     Serial.print(F("Radio VFO A band is "));
+    //     Serial.print(band, HEX);
+    //     Serial.println(F(", please check"));
+    // }
+    // else
+    // {
+    //     Serial.println(F("Reading the VFO A band failed, please check"));
+    // }
+    // delay(dly);
 
-    // Check ABC softkeys
-    byte ds = radio.getDisplaySelection();
-    Serial.print(F("Radio display selection is "));
-    Serial.print(ds);
-    Serial.println(F(" please check"));
-    delay(dly);
+    // // Check ABC softkeys
+    // byte ds = radio.getDisplaySelection();
+    // Serial.print(F("Radio display selection is "));
+    // Serial.print(ds);
+    // Serial.println(F(" please check"));
+    // delay(dly);
 
-    // get smeter
-    byte sm = radio.getSMeter();
-    Serial.print(F("Radio S-Meter value is 0x"));
-    Serial.print(sm, HEX);
-    Serial.println(F(", please check"));
-    delay(dly);
+    // // get smeter
+    // byte sm = radio.getSMeter();
+    // Serial.print(F("Radio S-Meter value is 0x"));
+    // Serial.print(sm, HEX);
+    // Serial.println(F(", please check"));
+    // delay(dly);
 
-    // get Nar status of the actual channel
-    bool Nar = radio.getNar();
-    Serial.print(F("Radio VFO Narrow state in this channel is: "));
-    Serial.print(Nar);
-    Serial.println(F(", please check"));
-    delay(dly);
+    // // get Nar status of the actual channel
+    // bool Nar = radio.getNar();
+    // Serial.print(F("Radio VFO Narrow state in this channel is: "));
+    // Serial.print(Nar);
+    // Serial.println(F(", please check"));
+    // delay(dly);
 
 #ifdef EEPROM_WRITES
     Serial.println("Now we will test some of the functions that writes to the EEPROM,");

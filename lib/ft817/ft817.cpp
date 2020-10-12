@@ -266,7 +266,8 @@ bool FT817::getVFO()
 {
 	MSB = 0x00;	// set the address to read
 	LSB = 0x55;
-	return (bool((readEEPROM() & 0b00000001)));    // debug in progress here... g7uhn
+	readEEPROM();
+	return (bool)(actualByte & 0b00000001);    // 0 = VFO A, 1 = VFO B
 }
 
 // get the mode indirectly
@@ -448,14 +449,14 @@ void FT817::flushBuffer()
 // it loads two bytes, they are placed in actualByte & nextByte
 bool FT817::readEEPROM()
 {
-	// there is evidence that this fails?
+	// set 'valid data' flag to false, we see two consequtive matching reads we set it to true
 	eepromValidData = false;
 	for (byte i=0; i<4; i++)
 	{
 		flushBuffer();
 		buffer[0] = MSB;  // MSB EEPROM data byte
 		buffer[1] = LSB;  // LSB EEPROM data byte
-		buffer[4] = 0xBB; // BB command byte (read EEPROM data)sendCmd();
+		buffer[4] = 0xBB; // BB command byte (read EEPROM data) for sendCmd();
 		sendCmd();
 		getBytes(2);
 		if ((i > 0) & ((actualByte == buffer[0]) & (nextByte == buffer[1])))
