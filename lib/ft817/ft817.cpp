@@ -505,8 +505,8 @@ bool FT817::writeEEPROM(byte data)
 	getByte();
 
 	// almost all EEPROMs have a write delay, from 1 to 5 msecs
-	// we go here for 5 msec, this must be adjusted in practice
-	delay(5);
+	// we go here for 10 msec, this must be adjusted in practice
+	delay(10);
 
 	// read it & check
 	count = 3;
@@ -672,7 +672,7 @@ bool FT817::getBitFromVFO(signed int offset, byte rbit)
 	// returns false can't calculate the data
 	if (!eepromValidData) { return eepromValidData; }
 
-	// we are targeting base address + 2
+	// we are targeting base address + offset
 	modAddr(0, offset);
 
 	// get the final value and return it
