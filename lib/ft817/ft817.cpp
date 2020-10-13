@@ -29,7 +29,7 @@ This allow us to be consistent and save a few bytes of firmware
 #include "ft817.h"
 
 // define software serial IO pins here:
-extern SoftwareSerial rigCat(2, 3); // rx,tx
+extern SoftwareSerial rigCat(12, 11); // rx,tx
 
 #define dlyTime 5	// delay (in ms) after serial writes
 
@@ -169,7 +169,9 @@ void FT817::setMode(byte mode)
 		flushBuffer();
 		buffer[0] = mode;
 		buffer[4] = CAT_MODE_SET;
-		getByte();
+		// missing a sendCmd here...
+		sendCmd();
+		getByte();     
 	}
 }
 
@@ -264,7 +266,8 @@ bool FT817::getVFO()
 {
 	MSB = 0x00;	// set the address to read
 	LSB = 0x55;
-	return (bool)(readEEPROM() & 0b00000001);
+	readEEPROM();
+	return (bool)(actualByte & 0b00000001);    // 0 = VFO A, 1 = VFO B
 }
 
 // get the mode indirectly
@@ -297,7 +300,8 @@ byte FT817::getBandVFO(bool vfo)
 	// see the band specs in the .h file
 	MSB = 0x00;	// set the address to read
 	LSB = 0x59;
-	byte band = readEEPROM();
+	readEEPROM();
+	byte band = actualByte;
 	if (vfo)
 	{
 		// B
@@ -333,11 +337,13 @@ boolean FT817::chkTX()
 
 // get display selection
 // values from 0x00 to 0x0B
+// only valid if eepromDataValid is true
 byte FT817::getDisplaySelection()
 {
 	MSB = 0x00;	// set the address to read
 	LSB = 0x76;
-	return readEEPROM();
+	readEEPROM();
+	return actualByte & 0b00001111;    // display selection is bits 0-3 of hex address 0x76
 }
 
 // get smeter value
@@ -386,8 +392,7 @@ bool FT817::getKeyer()
 byte FT817::getByte()
 {
 	unsigned long startTime = millis();
-	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }
-
+	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }  // I see this came from the VE3BUX lib... but shouldn't something be inside this while{} ? Maybe a timeout?
 	return rigCat.read();
 }
 
@@ -399,9 +404,10 @@ void FT817::getBytes(byte count)
 	while (rigCat.available() < 1 && millis() < startTime + 2000) { ; }
 
 	flushBuffer();
-	for (byte i=count; i>0; i--)
+	for (byte i=0; i<count; i++)
 	{
 		buffer[i] = rigCat.read();
+		delay(5);					// needs a delay in here, otherwise the byte sequence read is incorrect
 	}
 }
 
@@ -413,6 +419,7 @@ void FT817::sendCmd()
 	for (byte i=0; i<5; i++)
 	{
 		rigCat.write(buffer[i]);
+//		Serial.println(buffer[i]);        // debug aid
 	}
 }
 
@@ -445,14 +452,14 @@ void FT817::flushBuffer()
 // it loads two bytes, they are placed in actualByte & nextByte
 bool FT817::readEEPROM()
 {
-	// there is evidence that this fails?
+	// set 'valid data' flag to false, we see two consequtive matching reads we set it to true
 	eepromValidData = false;
 	for (byte i=0; i<4; i++)
 	{
 		flushBuffer();
 		buffer[0] = MSB;  // MSB EEPROM data byte
 		buffer[1] = LSB;  // LSB EEPROM data byte
-		buffer[4] = 0xBB; // BB command byte (read EEPROM data)sendCmd();
+		buffer[4] = 0xBB; // BB command byte (read EEPROM data) for sendCmd();
 		sendCmd();
 		getBytes(2);
 		if ((i > 0) & ((actualByte == buffer[0]) & (nextByte == buffer[1])))
@@ -527,6 +534,7 @@ bool FT817::writeEEPROM(byte data)
 // as a frequency in 10hz resolution
 unsigned long FT817::from_bcd_be()
 {
+	// first four bytes from buffer are the freq data in binary coded decimal
 	// {0x01,0x40,0x07,0x00,0x01} tunes to 14.070MHz
 	freq = 0;
 	for (byte i = 0; i < 4; i++)
