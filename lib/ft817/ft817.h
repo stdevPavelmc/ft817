@@ -409,7 +409,7 @@ class FT817
 		// vars
 		unsigned long freq;		// frequency data as a long
 		byte mode;					// last mode read
-		unsigned char buffer[5];	// buffer used to TX and RX data to the radio
+		byte buffer[5];	// buffer used to TX and RX data to the radio
 		byte MSB;					// MSB of the eeprom address | both used to calculate the address of
 		byte LSB;					// LSB of the eeprom address | the eeprom
 		byte actualByte;			// Actual byte requested by any EEPROM read operation
