@@ -1,21 +1,7 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../../Software/FT-817 works/ft817_buddy/Arduino/sketch"
-		}
-	],
-	"settings": {
-		"cSpell.enableFiletypes": [
-			"cpp"
-		],
-		"files.associations": {
-			"*.cf": "shellscript",
-			"array": "cpp",
-			"string": "cpp",
-			"string_view": "cpp"
-		}
-	}
+    "folders": [
+        {
+            "path": "."
+        }
+    ]
 }

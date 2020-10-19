@@ -1,0 +1,44 @@
+radio	KEYWORD1
+
+lock    KEYWORD2
+PTT     KEYWORD2
+clar    KEYWORD2
+split   KEYWORD2
+toggleVFO   KEYWORD2
+toggleNar   KEYWORD2
+toggleIPO   KEYWORD2
+toggleBreakIn   KEYWORD2
+toggleKeyer KEYWORD2
+
+setFreq     KEYWORD2
+setMode     KEYWORD2
+clarFreq    KEYWORD2
+switchVFO   KEYWORD2
+rptrOffset  KEYWORD2
+rptrOffsetFreq  KEYWORD2
+squelch     KEYWORD2
+squelchFreq KEYWORD2
+
+getVFO      KEYWORD2
+getMode     KEYWORD2
+getFreqMode     KEYWORD2
+getBandVFO  KEYWORD2
+chkTX       KEYWORD2
+getDisplaySelection     KEYWORD2
+getSMeter   KEYWORD2
+getNar      KEYWORD2
+getIPO      KEYWORD2
+getBreakIn  KEYWORD2
+getKeyer    KEYWORD2
+
+eepromValidData     KEYWORD2
+
+CAT_MODE_LSB    LITERAL1
+CAT_MODE_USB    LITERAL1
+CAT_MODE_CW     LITERAL1
+CAT_MODE_CWR    LITERAL1
+CAT_MODE_AM     LITERAL1
+CAT_MODE_WBFM   LITERAL1
+CAT_MODE_FM     LITERAL1
+CAT_MODE_DIG    LITERAL1
+CAT_MODE_PKT    LITERAL1
