@@ -16,7 +16,7 @@
 #include "ft817.h"
 
 // uncomment this is you want to test the functions that WRITES to the EEPROM 
-//#define EEPROM_WRITES
+#define EEPROM_WRITES
 
 FT817 radio; // define "radio" so that we may pass CAT commands
 
@@ -60,65 +60,65 @@ void loop()
     // Serial.println(F("Radio set to USB in 14.070Mhz, please check"));
     // delay(dly);
 
-    // Check VFO in use
-    bool vfo = radio.getVFO();
-    if (radio.eepromValidData)
-    {
-        // 0 = VFO A, 1 = VFO B
-        if (vfo)
-        {
-            Serial.println(F("Radio VFO B active, please check"));
-        }
-        else
-        {
-            Serial.println(F("Radio VFO A active, please check"));
-        }
-    }
-    else
-    {
-        Serial.println(F("Reading the active VFO failed, please check"));
-    }
-    delay(dly);
+    // // Check VFO in use
+    // bool vfo = radio.getVFO();
+    // if (radio.eepromValidData)
+    // {
+    //     // 0 = VFO A, 1 = VFO B
+    //     if (vfo)
+    //     {
+    //         Serial.println(F("Radio VFO B active, please check"));
+    //     }
+    //     else
+    //     {
+    //         Serial.println(F("Radio VFO A active, please check"));
+    //     }
+    // }
+    // else
+    // {
+    //     Serial.println(F("Reading the active VFO failed, please check"));
+    // }
+    // delay(dly);
 
     // // VFO toggle
     // radio.toggleVFO();
     // Serial.println(F("Radio toggled the VFO, please check"));
     // delay(dly);
 
-    // VFO A band
-    byte bandA = radio.getBandVFO(false);   // for getBandVFO() input, false = VFO A, true = VFO B
-    if (radio.eepromValidData)
-    {
-        Serial.print(F("Radio VFO A band is "));
-        Serial.print(bandA, HEX);
-        Serial.println(F(", please check"));
-    }
-    else
-    {
-        Serial.println(F("Reading the VFO A band failed, please check"));
-    }
-    delay(dly);
+    // // VFO A band
+    // byte bandA = radio.getBandVFO(false);   // for getBandVFO() input, false = VFO A, true = VFO B
+    // if (radio.eepromValidData)
+    // {
+    //     Serial.print(F("Radio VFO A band is "));
+    //     Serial.print(bandA, HEX);
+    //     Serial.println(F(", please check"));
+    // }
+    // else
+    // {
+    //     Serial.println(F("Reading the VFO A band failed, please check"));
+    // }
+    // delay(dly);
 
-    // VFO B band
-    byte bandB = radio.getBandVFO(true);   // for getBandVFO() input, false = VFO A, true = VFO B
-    if (radio.eepromValidData)
-    {
-        Serial.print(F("Radio VFO B band is "));
-        Serial.print(bandB, HEX);
-        Serial.println(F(", please check"));
-    }
-    else
-    {
-        Serial.println(F("Reading the VFO B band failed, please check"));
-    }
-    delay(dly);
+    // // VFO B band
+    // byte bandB = radio.getBandVFO(true);   // for getBandVFO() input, false = VFO A, true = VFO B
+    // if (radio.eepromValidData)
+    // {
+    //     Serial.print(F("Radio VFO B band is "));
+    //     Serial.print(bandB, HEX);
+    //     Serial.println(F(", please check"));
+    // }
+    // else
+    // {
+    //     Serial.println(F("Reading the VFO B band failed, please check"));
+    // }
+    // delay(dly);
 
-    // Check ABC softkeys
-    byte ds = radio.getDisplaySelection();
-    Serial.print(F("Radio display selection is "));
-    Serial.print(ds);
-    Serial.println(F(" please check"));
-    delay(dly);
+    // // Check ABC softkeys
+    // byte ds = radio.getDisplaySelection();
+    // Serial.print(F("Radio display selection is "));
+    // Serial.print(ds);
+    // Serial.println(F(" please check"));
+    // delay(dly);
 
     // // get smeter
     // byte sm = radio.getSMeter();
@@ -127,12 +127,12 @@ void loop()
     // Serial.println(F(", please check"));
     // delay(dly);
 
-    // // get Nar status of the actual channel
-    // bool Nar = radio.getNar();
-    // Serial.print(F("Radio VFO Narrow state in this channel is: "));
-    // Serial.print(Nar);
-    // Serial.println(F(", please check"));
-    // delay(dly);
+    // get Nar status of the actual channel
+    bool Nar = radio.getNar();
+    Serial.print(F("Radio VFO Narrow state in this channel is: "));
+    Serial.print(Nar);
+    Serial.println(F(", please check"));
+    delay(dly);
 
 #ifdef EEPROM_WRITES
     Serial.println("Now we will test some of the functions that writes to the EEPROM,");
@@ -140,32 +140,42 @@ void loop()
     Serial.println("during this tests");
     delay(dly);
 
-    // toggle narrow
-    // switch to 20m USB
-    radio.setFreq(1407000);
-    radio.setMode(CAT_MODE_USB);
-    Serial.println("Radio switched to 14.070 Mhz USB, please note the Narrow State");
-    Serial.println("it will change in a few seconds");
-    delay(dly);
-    radio.toggleNar();
-    Serial.println("Radio toggled the narrow status, please check...");
-    delay(dly);
+    // // toggle narrow
+    // // switch to 20m USB
+    // radio.setFreq(1405000);
+    // radio.setMode(CAT_MODE_CW);
+    // Serial.println("Radio switched to 14.050 Mhz CW, please note the Narrow State");
+    // Serial.println("it will change in a few seconds");
+    // delay(dly);
+    // radio.toggleNar();
+    // Serial.println("Radio toggled the narrow status, please check...");
+    // delay(dly);
 
-    // break in
-    radio.setFreq(1404000);
-    radio.setMode(CAT_MODE_USB);
-    Serial.println("Radio switched to 14.040 Mhz USB, please note the BreakIn State");
-    Serial.println("it will change in a few seconds");
-    delay(dly);
-    radio.toggleBreakIn();
-    Serial.println("Radio toggled the BreakIn status, please check...");
-    delay(dly);
+    // // break in
+    // radio.setFreq(1808000);
+    // radio.setMode(CAT_MODE_CWR);
+    // Serial.println("Radio switched to 18.080 Mhz CWR, please note the BreakIn State");
+    // Serial.println("it will change in a few seconds");
+    // delay(dly);
+    // radio.toggleBreakIn();
+    // Serial.println("Radio toggled the BreakIn status, please check...");
+    // delay(dly);
+
 
     // Keyer
-    Serial.println("Please note the BreakIn State");
+    Serial.println("Please note the Keyer State");
     Serial.println("it will change in a few seconds");
     delay(dly);
-    radio.toggleBreakIn();
+    radio.toggleKeyer();
+    Serial.println("Radio toggled the Keyer status, please check...");
+    delay(dly);
+    radio.toggleKeyer();
+    Serial.println("Radio toggled the Keyer status, please check...");
+    delay(dly);
+    radio.toggleKeyer();
+    Serial.println("Radio toggled the Keyer status, please check...");
+    delay(dly);
+    radio.toggleKeyer();
     Serial.println("Radio toggled the Keyer status, please check...");
     delay(dly);
 
