@@ -25,11 +25,14 @@ This allow us to be consistent and save a few bytes of firmware
 */
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 #include "ft817.h"
 
-// define software serial IO pins here:
-extern SoftwareSerial rigCat(12, 11); // rx,tx
+// if using software serial, include and define software serial IO pins here (uncomment two lines below):
+// #include <SoftwareSerial.h>
+// extern SoftwareSerial rigCat(12, 11); // rx,tx
+
+// if using hardware serial, define hardware serial alias here (uncomment one line below):
+#define rigCat Serial
 
 #define dlyTime 5	// delay (in ms) after serial writes
 
@@ -40,13 +43,13 @@ FT817::FT817(){ }	// nothing to do when first instanced
 
 // Setup software serial with user defined input
 // from the Arduino sketch (function, though very slow)
-void FT817::setSerial(SoftwareSerial portInfo)
-{
-	rigCat = portInfo;
-}
+// void FT817::setSerial(SoftwareSerial portInfo)
+// {
+// 	rigCat = portInfo;
+// }
 
 // similar to Serial.begin(baud); command
-void FT817::begin(int baud)
+void FT817::begin(long baud)
 {
 	rigCat.begin(baud);
 }
@@ -130,7 +133,7 @@ bool FT817::toggleIPO()
 	return toggleBitFromVFO(2, 5);
 }
 
-// Toggle the BrakIn option
+// Toggle the BreakIn option
 // BreakIn is bit 5 of EEPROM byte 58
 bool FT817::toggleBreakIn()
 {
@@ -146,6 +149,15 @@ bool FT817::toggleKeyer()
 	MSB = 0x00;
 	LSB = 0x58;
 	return toggleBitFromEEPROM(4);
+}
+
+// Toggle the RF Gain / Squelch control
+// Set by bit 7 of EEPROM byte 5F
+bool FT817::toggleRfSql()
+{
+	MSB = 0x00;
+	LSB = 0x5F;
+	return toggleBitFromEEPROM(7);
 }
 
 /****** SET COMMANDS ********/
@@ -169,7 +181,6 @@ void FT817::setMode(byte mode)
 		flushBuffer();
 		buffer[0] = mode;
 		buffer[4] = CAT_MODE_SET;
-		// missing a sendCmd here...
 		sendCmd();
 		getByte();     
 	}
@@ -254,6 +265,21 @@ void FT817::squelchFreq(unsigned int freq, char * sqlType)
 
 	sendCmd();
 	getByte();
+}
+
+void FT817::setKeyerSpeed(int speed)
+{
+	byte wpm = constrain(speed, 4, 60);   	// Constrain input between FT-817 min and max keyer speed
+	byte keyerSpeedSetting = wpm - 4;
+	MSB = 0x00;
+	LSB = 0x62;
+	readEEPROM();
+	if (eepromValidData)
+	{
+		byte bitsAbove = 0b11000000 & actualByte;	// bits 6 and 7 from byte 0x62 must be kept (= Battery Charge Time)
+		keyerSpeedSetting = bitsAbove | keyerSpeedSetting;
+		writeEEPROM(keyerSpeedSetting);
+	}
 }
 
 
@@ -369,7 +395,7 @@ bool FT817::getIPO()
 	return getBitFromVFO(2, 5);
 }
 
-// get BrakIn status from bit 5 in EEPROM address 0x58
+// get BreakIn status from bit 5 in EEPROM address 0x58
 bool FT817::getBreakIn()
 {
 	MSB = 0x00;
@@ -377,7 +403,7 @@ bool FT817::getBreakIn()
 	return getBitFromEEPROM(5);
 }
 
-// get BrakIn status from bit 4 in EEPROM address 0x58
+// get Keyer status from bit 4 in EEPROM address 0x58
 bool FT817::getKeyer()
 {
 	MSB = 0x00;
@@ -419,7 +445,6 @@ void FT817::sendCmd()
 	for (byte i=0; i<5; i++)
 	{
 		rigCat.write(buffer[i]);
-//		Serial.println(buffer[i]);        // debug aid
 	}
 }
 
@@ -473,7 +498,7 @@ bool FT817::readEEPROM()
 			nextByte = buffer[1];
 		}
 
-		delay(50); // mandatory delay
+		delay(20); // mandatory delay
 	}
 
 	return eepromValidData;
