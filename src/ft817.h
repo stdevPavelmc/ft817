@@ -64,6 +64,7 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 	0x04 = AM						= CAT_MODE_AM
 	0x06 = WBFM						= CAT_MODE_WBFM <<<<
 	0x08 = FM						= CAT_MODE_FM
+	0x88 = FMN						= CAT_MODE_FMN
 	0x0A = DIG						= CAT_MODE_DIG
 	0x0C = PKT						= CAT_MODE_PKT
 
@@ -284,7 +285,9 @@ getBandVFO(VFO)
 #define CAT_h
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+#ifndef Use_HW_Serial
+	#include <SoftwareSerial.h>
+#endif
 
 #define CAT_LOCK_ON			0x00
 #define CAT_LOCK_OFF		0x80
@@ -299,6 +302,7 @@ getBandVFO(VFO)
 #define CAT_MODE_AM			0x04
 #define CAT_MODE_WBFM		0x06
 #define CAT_MODE_FM			0x08
+#define CAT_MODE_FMN		0x88 // Read ONLY, not SET
 #define CAT_MODE_DIG		0x0A
 #define CAT_MODE_PKT		0x0C
 #define CAT_CLAR_ON			0x05
@@ -332,8 +336,10 @@ class FT817
 	public:
 		FT817();
 		// setup
-		// void setSerial(SoftwareSerial portInfo);	// load the softserial to the FT817 (not used on FT817_Buddy from Rev2)
-		void begin(long baud);						// set the baudrate of the serial lib 
+		#ifndef Use_HW_Serial 
+			void setSerial(SoftwareSerial portInfo);	// load the softserial into the FT817
+		#endif
+		void begin(unsigned int baud);						// set the baudrate of the softserial lib 
 
 		// toggles
 		void lock(boolean toggle);		// lock/unlock
@@ -350,12 +356,12 @@ class FT817
 		bool toggleRfSql();				// toggle RF Gain/SQL control
 
 		// set commands
-		void setFreq(long freq);		// in 10' of hz
+		void setFreq(unsigned long freq);		// in 10' of hz
 		void setMode(byte mode);		// in text
-		void clarFreq(long freq);		// 
+		void clarFreq(unsigned long freq);		// 
 		void switchVFO(bool vfo);		// 0 = A / 1 = B, checks the actual VFO to know if need to change
 		void rptrOffset(char *ofst);	// "-" / "+" / "s"
-		void rptrOffsetFreq(long freq);
+		void rptrOffsetFreq(unsigned long freq);
 		void squelch(char * mode);
 		void squelchFreq(unsigned int, char * sqlType);
 		void setKeyerSpeed(int speed);
@@ -368,6 +374,7 @@ class FT817
 		boolean chkTX();				//
 		byte getDisplaySelection();		// return a number that represents the row (see notes in the header of this file)
 		byte getSMeter();				// as a byte (see notes in the header of this file)
+		byte getPMeter();				// as a byte (see notes in the header of this file)
 		bool getNar();					// get the actual narrow status for the current VFO
 		bool getIPO();					// get the IPO status for the actual VFO
 		bool getBreakIn();				// get the Break In operation status
