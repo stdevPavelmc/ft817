@@ -23,16 +23,22 @@ receive it always be to and from the buffer.
 This allow us to be consistent and save a few bytes of firmware
 
 */
+#define Use_HW_Serial
 
 #include <Arduino.h>
+#ifndef Use_HW_Serial
+	#include <SoftwareSerial.h>
+	// define software serial IO pins here:
+	#ifdef rxPin && txPin
+        extern SoftwareSerial rigCat(rxPin, txPin); // rx,tx
+	#else
+        extern SoftwareSerial rigCat(12, 11); // rx,tx
+    #endif
+#else
+	#define rigCat Serial
+#endif
+
 #include "ft817.h"
-
-// if using software serial, include and define software serial IO pins here (uncomment two lines below):
-// #include <SoftwareSerial.h>
-// extern SoftwareSerial rigCat(12, 11); // rx,tx
-
-// if using hardware serial, define hardware serial alias here (uncomment one line below):
-#define rigCat Serial
 
 #define dlyTime 5	// delay (in ms) after serial writes
 
@@ -40,18 +46,18 @@ FT817::FT817(){ }	// nothing to do when first instanced
 
 
 /****** SETUP ********/
-
-// Setup software serial with user defined input
-// from the Arduino sketch (function, though very slow)
-// void FT817::setSerial(SoftwareSerial portInfo)
-// {
-// 	rigCat = portInfo;
-// }
-
+#ifndef Use_HW_Serial
+	// Setup software serial with user defined input
+	// from the Arduino sketch (function, though very slow)
+	void FT817::setSerial(SoftwareSerial portInfo)
+	{
+		rigCat = portInfo;
+	}
+#endif
 // similar to Serial.begin(baud); command
-void FT817::begin(long baud)
+void FT817::begin(unsigned int baud)
 {
-	rigCat.begin(baud);
+	rigCat.begin(baud, SERIAL_8N2);
 }
 
 
@@ -164,7 +170,7 @@ bool FT817::toggleRfSql()
 
 // set radio frequency directly (as a long integer)
 // in 10hz steps
-void FT817::setFreq(long freq)
+void FT817::setFreq(unsigned long freq)
 {
 	to_bcd_be(freq);
 	buffer[4] = CAT_FREQ_SET;
@@ -187,7 +193,7 @@ void FT817::setMode(byte mode)
 }
 
 // set the clarifier frequency
-void FT817::clarFreq(long freq)
+void FT817::clarFreq(unsigned long freq)
 {
 	// will come back to this later
 }
@@ -195,7 +201,7 @@ void FT817::clarFreq(long freq)
 // switch to a specific VFO
 void FT817::switchVFO(bool vfo)
 {
-	if (getVFO() & !vfo) {
+	if (getVFO() != vfo) {
 		toggleVFO();
 	}
 }
@@ -219,7 +225,7 @@ void FT817::rptrOffset(char * ofst)
 }
 
 // set the freq of the offset
-void FT817::rptrOffsetFreq(long freq)
+void FT817::rptrOffsetFreq(unsigned long freq)
 {
 	freq = (freq * 100); // convert the incoming value to kHz
 	to_bcd_be(freq);
@@ -339,10 +345,28 @@ byte FT817::getBandVFO(bool vfo)
 		return band & 0b00001111;
 	}
 }
+// get powermeter value
+byte FT817::getPMeter()
+{
+	flushBuffer();
+	buffer[4] = CAT_TX_DATA_CMD;
 
+	sendCmd();
+	byte reply = getByte();
+	//
+	if (((reply>>7)&0x1) == 1) { // RX mode
+		return 0;
+	} else if (((reply>>6)&0x1) == 1) { // High VSWR!
+		reply = (reply & 0b00001111) + 0b10000000;
+	} else {
+		reply = reply&0b00001111;
+	}
+	return reply;
+}
 // determine if the radio is in TX state
 // unless the radio is actively TX, the result is always
 // 0x255 so any value other than 0x255 means TX !
+// if Bit 7 is 0 than radio is in TX state
 boolean FT817::chkTX()
 {
 	flushBuffer();
@@ -351,12 +375,11 @@ boolean FT817::chkTX()
 	sendCmd();
 	byte reply = getByte();
 
-	if (reply == 0)
-	{
+	reply = (reply>>7) & 0x1;
+
+	if (reply == 1) {
 		return false;
-	}
-	else
-	{
+	} else {
 		return true;
 	}
 }
