@@ -354,7 +354,7 @@ byte FT817::getPMeter()
 	sendCmd();
 	byte reply = getByte();
 	//
-	if (((reply>>7)&0x1) == 1) { // RX mode
+	if (((reply>>7)&0x1) == 1) { // in RX state
 		return 0;
 	} else if (((reply>>6)&0x1) == 1) { // High VSWR!
 		reply = (reply & 0b00001111) + 0b10000000;
@@ -373,9 +373,7 @@ bool FT817::chkTX()
 	sendCmd();
 	byte reply = getByte();
 
-	reply = (reply>>7) & 0x1;
-
-	if (reply == 0) {
+	if (((reply>>7)&0x1) == 0) {
 		return true; // In TX state
 	} else {
 		return false; // In RX state
@@ -765,4 +763,3 @@ bool FT817::toggleBitFromVFO(signed int offset, byte rbit)
 	// success?
 	if (eepromValidData) { return true; } else { return false; }
 }
-
