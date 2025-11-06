@@ -364,10 +364,8 @@ byte FT817::getPMeter()
 	return reply;
 }
 // determine if the radio is in TX state
-// unless the radio is actively TX, the result is always
-// 0x255 so any value other than 0x255 means TX !
 // if Bit 7 is 0 than radio is in TX state
-boolean FT817::chkTX()
+bool FT817::chkTX()
 {
 	flushBuffer();
 	buffer[4] = CAT_TX_DATA_CMD;
@@ -377,13 +375,12 @@ boolean FT817::chkTX()
 
 	reply = (reply>>7) & 0x1;
 
-	if (reply == 1) {
-		return false;
+	if (reply == 0) {
+		return true; // In TX state
 	} else {
-		return true;
+		return false; // In RX state
 	}
 }
-
 // get display selection
 // values from 0x00 to 0x0B
 // only valid if eepromDataValid is true
@@ -768,3 +765,4 @@ bool FT817::toggleBitFromVFO(signed int offset, byte rbit)
 	// success?
 	if (eepromValidData) { return true; } else { return false; }
 }
+
