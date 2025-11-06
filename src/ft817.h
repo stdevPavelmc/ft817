@@ -208,8 +208,8 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 
 		0bABCD_EFGH
 		- A: PTT
-			0 = unkeyed
-			1 = keyed
+			0 = keyed
+			1 = unkeyed
 		- B: SWR
 			0 = SWR low (no calibration yet)
 			1 = SWR high (not calibration yet)
@@ -371,7 +371,7 @@ class FT817
 		byte getMode();					// return a byte with the mode
 		unsigned long getFreqMode();	// in 10' of hz
 		byte getBandVFO(bool);			// return the band (see notes in the header of this file)
-		boolean chkTX();				//
+		bool chkTX();					// return true if the radio is in TX state
 		byte getDisplaySelection();		// return a number that represents the row (see notes in the header of this file)
 		byte getSMeter();				// as a byte (see notes in the header of this file)
 		byte getPMeter();				// as a byte (see notes in the header of this file)
@@ -428,3 +428,4 @@ class FT817
 };
 
 #endif
+
