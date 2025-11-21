@@ -1,9 +1,9 @@
-# FT-817 CAT library
+# FT-817/857/897 CAT library
 
-This is a CAT library to interface with a Yaesu FT-817 radio, with a lot of STAMINA via direct EEPROM access.
+This is a CAT library to interface with a Yaesu FT-817/857/897 radio, with a lot of STAMINA via direct EEPROM access.
 
 ## Inspiration
-
+- [stdevPavelmc ft817 library](https://github.com/stdevPavelmc/ft817)
 - [James Buck, VE3BUX FT-857D library](http://www.ve3bux.com)
 - [KA7OEI FT-817 pages](http://www.ka7oei.com/ft817pg.shtml)
 - [Andy Webster FT-817_Buddy project](https://github.com/g7uhn/ft817_buddy)
