@@ -29,7 +29,9 @@ Se the example once you install your lib, it covers almost all functions we have
 
 ## Contributions & Thanks
 
-Thanks to [Andy Webster](https://github.com/g7uhn) that tested the code on a live radio, Yes, I coded all this blindly as I don't have a FT-817 radio, one of my dream radios.
+Thanks to [Andy Webster (G7UHN)](https://github.com/g7uhn) that tested the code on a live radio, Yes, I coded all this blindly as I don't have a FT-817 radio, one of my dream radios.
+
+Thanks to [Sergey Dorozhkin (R2AKT)](https://github.com/R2AKT) for the addition of get powermeter, FMN mode and default SERIAL_8N2 connection setup
 
 You have a question/bug/improvement/etc, please reach me via Telegram as @pavelmc o via Twitter as @co7wt.
 
